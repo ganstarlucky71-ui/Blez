@@ -361,7 +361,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.markdown("<h1 style='text-align: center; position: relative; z-index: 10;'>☠️<span class='disco-lucky'>𝞑꯭꯭𝑳꯭꯭𝚫̵꯭꯭︥𝒁꯭꯭̄𝜩</span>🌎<span class='disco-lucky'>𝐃ꯥ꯭ꮻ꯭ꮇ꯭𝛊❤️𝐋𝐔𝐂𝐊𝐘</span>🖥️</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; position: relative; z-index: 10;'>☠️<span class='disco-lucky'>𝘽𝙡𝙚𝙯🌷𝘿𝙤𝙢𝙞❤️𝙇𝙪𝙘𝙠𝙮🖥️</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; font-size: 1.2rem; position: relative; z-index: 10;'>SYS.ADMIN: ROOT | <span class='disco-lucky'>𝐋𝐔𝐂𝐊𝐘</span></p>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: #88ff88; position: relative; z-index: 10;'>Is panel se aap bot network ko kisi bhi target room me bhej sakte hain.</p>", unsafe_allow_html=True)
 
