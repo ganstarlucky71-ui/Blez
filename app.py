@@ -222,7 +222,7 @@ def smart_resolve_input(input_str):
 # ==========================================
 # 🌐 STREAMLIT UI DESIGN (RGB DISCO & AQUARIUM THEME)
 # ==========================================
-st.set_page_config(page_title="𝞑꯭꯭𝑳꯭꯭𝚫̵꯭꯭︥𝒁꯭꯭̄𝜩🥀𝞑꯭꯭𝑳꯭꯭𝚫̵꯭꯭︥𝒁꯭꯭̄𝜩❤️𝐋𝐔𝐂𝐊𝐘 | Command Center", page_icon="☠️", layout="centered")
+st.set_page_config(page_title="Lucky Godfather 🌎| Command Center", page_icon="☠️", layout="centered")
 
 # Custom Hacker RGB & Fish Animation CSS
 st.markdown(
@@ -399,7 +399,7 @@ if st.button("🚀 Click✅"):
                     st.error(f"❌ SERVER UNREACHABLE. TARGET OFFLINE.")
             
             st.balloons()
-            st.markdown("<h3 style='text-align: center; position: relative; z-index: 10;'>🎉 <span class='disco-lucky'>𝐋𝐔𝐂𝐊𝐘</span> 🌎 <span class='disco-lucky'>𝙂𝙤𝙙𝙛𝙖𝙩𝙝𝙚𝙧</span> 🖥️ ZINDABAD 🙋🏻‍♂️</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='text-align: center; position: relative; z-index: 10;'>🎉 <span class='disco-lucky'>𝞑꯭꯭𝑳꯭꯭𝚫̵꯭꯭︥𝒁꯭꯭̄𝜩</span> 🌷 <span class='disco-lucky'>𝐃ꯥ꯭ꮻ꯭ꮇ꯭𝛊❤️𝐋𝐔𝐂𝐊𝐘</span> 🖥️ ZINDABAD 🙋🏻‍♂️</h3>", unsafe_allow_html=True)
         else:
             st.error("❌ FATAL ERROR: INVALID TARGET OR USER OFFLINE.")
 
