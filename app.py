@@ -222,7 +222,7 @@ def smart_resolve_input(input_str):
 # ==========================================
 # 🌐 STREAMLIT UI DESIGN (RGB DISCO & AQUARIUM THEME)
 # ==========================================
-st.set_page_config(page_title="LUCKY GODFATHER | Command Center", page_icon="☠️", layout="centered")
+st.set_page_config(page_title="𝞑꯭꯭𝑳꯭꯭𝚫̵꯭꯭︥𝒁꯭꯭̄𝜩🥀𝞑꯭꯭𝑳꯭꯭𝚫̵꯭꯭︥𝒁꯭꯭̄𝜩❤️𝐋𝐔𝐂𝐊𝐘 | Command Center", page_icon="☠️", layout="centered")
 
 # Custom Hacker RGB & Fish Animation CSS
 st.markdown(
