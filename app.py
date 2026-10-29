@@ -18,8 +18,8 @@ RENDER_URLS = [
     "https://ai-2-458z.onrender.com"   # Tera main bot 2
 ]
 
-MY_UID = "4470446192" 
-MY_TOKEN = "s1ADV49zvqESx6DepjwTcqq0Cgql5W1d7wcby1s3SFxYWtKHkuy42LityBpB48a%2B%2CnNM9ovMxw69wCMG9kYDPy1WV7mYLzptDoYnZSrDJYKSMDuL3O7%2FyVkjbgiTjkE8YaTctZsAbvlW4h%2Fzv8TERCAvN5FehqBTb2sv1OHTuQwUTTdPJAnPR0HsNd%2F%2Bx2c8ayXDITjLOZA%2FG1dfw3j1%2BPgDhpEJIE9%2FTvVmEc%2Fylg9r8liQq7yyONJL9w3JeSCkhTR36%2B5Pv2hhcm5fyN4LhCohcvYlmDHnZGa0NcInSSQIZghkJulr5OY55ioMfe1PoBu8pnOzHg8kh1VJvuQ5Gb2AAfjaX6jwoM%2Bw9GyNlQJef1B3WZlPsb9zZ%2BnPpXObbAt%2F7CO9dWJLoRJhs53dd0jEZVJkZXUgycDnhVvXQP2OqICiq4asK3sXnZzin1npp9mlqrGlV1iKqC3mLxC9fH3jN56jWrThAuHaBBpSA5TZmvjnhPD0POPysAzRIzvq6pGFwo%2Br%2Frr3SnMDbHPFhvIEg1e3oiNehEMQYd%2BqNIReNGqvMzbk5tsRoY0HJRNIT"
+MY_UID = "4471498733" 
+MY_TOKEN = "yohsqjbLHNsz4wPjQJnqYURJryAbdQxtAyknrMcIo3nkWop%2Ft12GXoqTa6B7o5pr%2CnNM9ovMxw68SynWmeGkQHqHgMSYakwm3Nzuy8pj3H802MgTOVH%2FDUvUx1Q4kNInnznJuHUU%2BRyGBa65ot%2BiqSjDi72JFQ7mVDb8jwRspCIAfCMWiceXEOHoqc4yeiLKJFq%2Fj3%2BK6tNfuTp%2Fqwq9vAoVzCi3y9r%2FQkCIqyYyFjn7I9Wpf5W71Wv5j86MdfGLPLONDOt4KoimtKnQx1Ytm0AkNCKl7GPECQ8%2Bnl2ZlXHMCe8Kd7oSbEjarBSBO8Bo9Ddm5FxAei7R%2FU1rbflWMRd0UUvc5GHbOoC3VEoTEUzjjR3H7N79D66Xnfpp0uGoy1qcSo%2BfQg7ovz4Fxf2rZXjZWAxEr9AeHj74LYqXBRqp4hGLpZ3VmY4Lk9AgONyjVy3MtVlE4oq59KtIv5tdBVh7kg6m901DBCOCrN%2FB9uF4112tJ%2Fyl3N7yTW6hbgqOlf0qc3twksV%2BPVtOvs55DhWR5UtVo%2FZMyoqEGfAbB7%2B8xNy%2BoYzG2e6gtn8%2B4Mbwe"
 WS_URL = f"wss://i-875.olaparty.com/ikxd_cproxy?token={MY_UID}"
 
 HEADERS = {
@@ -53,7 +53,8 @@ def uid_to_varint_hex(uid_str, target_length=6):
             encoded_bytes.append(last | 0x80)
             encoded_bytes.append(0x00)
         return ' '.join([f'{b:02X}' for b in encoded_bytes])
-    except: return None
+    except:
+        return None
 
 def extract_uids_from_hex(raw_hex_packet):
     hex_list = raw_hex_packet.split()
@@ -68,7 +69,8 @@ def extract_uids_from_hex(raw_hex_packet):
                 byte = int(hex_list[j], 16)
                 result |= (byte & 0x7F) << shift
                 consumed += 1
-                if (byte & 0x80) == 0: break
+                if (byte & 0x80) == 0:
+                    break
                 shift += 7
             val = result
             length = consumed
@@ -82,22 +84,48 @@ def extract_uids_from_hex(raw_hex_packet):
     return uids
 
 def extract_cid_from_link(text):
-    match = re.search(r'(https?://api\.olaparty\.com/d/[\w-]+)', text)
-    if match: return match.group(1)
-    match = re.search(r'(https?://[\w\.]+/d/[\w-]+)', text)
-    if match: return match.group(1)
-    match = re.search(r'(https?://[^\s]+)', text)
-    if match: return match.group(1)
+    """Message ke beech me se ihago ya olaparty ya kisi bhi shareable link ko filter karta hai"""
+    # 1. Direct ihago / olaparty share link
+    match = re.search(r'(https?://(?:api\.)?(?:ihago|olaparty)\.(?:net|com)/d/[a-zA-Z0-9_-]+)', text, re.IGNORECASE)
+    if match:
+        return match.group(1)
+    
+    # 2. General short link /d/ format
+    match = re.search(r'(https?://[^\s/]+/d/[a-zA-Z0-9_-]+)', text, re.IGNORECASE)
+    if match:
+        return match.group(1)
+        
+    # 3. Any standard URL present in text
+    match = re.search(r'(https?://[^\s]+)', text, re.IGNORECASE)
+    if match:
+        return match.group(1)
+        
     return None
 
 def resolve_link_to_cid(url):
+    """Link open karke actual CID extract karta hai"""
     try:
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
-        response = requests.get(url, headers=headers, timeout=10, allow_redirects=True, verify=False)
-        combined_text = response.url + " " + response.text
-        cid_match = re.search(r'(C_\d+_V[12]_[A-Z]+_\d+_[A-Z]+|C_\d{10,})', combined_text, re.IGNORECASE)
+        session = requests.Session()
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Linux; Android 15; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+        }
+        response = session.get(url, headers=headers, timeout=12, allow_redirects=True, verify=False)
+        combined_text = f"{response.url} {response.text}"
+        
+        # Pattern 1: Standard Olaparty/Hago Channel ID format (e.g., C_123456_V1_... or C_123456)
+        cid_match = re.search(r'(C_\d+_V[12]_[A-Za-z0-9_]+|C_\d{8,})', combined_text, re.IGNORECASE)
         if cid_match: 
             return cid_match.group(1).upper()
+            
+        # Pattern 2: URL params me cid/channel_id
+        param_match = re.search(r'[?&](?:cid|channel_id|channelId|roomId)=([^&#\s]+)', combined_text, re.IGNORECASE)
+        if param_match:
+            val = param_match.group(1)
+            if not val.startswith("C_") and val.isdigit():
+                return f"C_{val}"
+            return val.upper()
+            
         return None
     except Exception as e:
         return None
@@ -125,7 +153,8 @@ def get_location_packet(target_uid):
     new_uid_varint = uid_to_varint_hex(target_uid, target_length=5)
     new_time_str = str(int(time.time() * 1000))
     new_time_varint = uid_to_varint_hex(new_time_str, target_length=6)
-    if not new_uid_varint or not new_time_varint: return None
+    if not new_uid_varint or not new_time_varint:
+        return None
     packet_hex = base_hex.replace(old_uid_varint, new_uid_varint).replace(old_time_varint, new_time_varint)
     return bytes.fromhex(packet_hex.replace(" ", ""))
 
@@ -149,16 +178,18 @@ class RoomTracker:
                 if not self.is_done:
                     self.is_done = True
                     ws.close()
-            threading.Thread(target=timeout).start()
+            threading.Thread(target=timeout, daemon=True).start()
 
             if self.step == "LOCATION":
                 loc_packet = get_location_packet(self.found_uid)
-                if loc_packet: ws.send(loc_packet, opcode=websocket.ABNF.OPCODE_BINARY)
+                if loc_packet:
+                    ws.send(loc_packet, opcode=websocket.ABNF.OPCODE_BINARY)
             else:
                 ws.send(get_search_packet(self.target_input), opcode=websocket.ABNF.OPCODE_BINARY)
 
         def on_message(ws, message):
-            if not isinstance(message, bytes): return
+            if not isinstance(message, bytes):
+                return
             hex_msg = message.hex(" ").upper()
             response_text = message.decode('utf-8', errors='ignore')
             
@@ -180,7 +211,7 @@ class RoomTracker:
                 return
 
             elif self.step == "LOCATION":
-                cid_match = re.search(r'(C_\d+_V[12]_[A-Z]+_\d+_[A-Z]+|C_\d{10,})', response_text, re.IGNORECASE)
+                cid_match = re.search(r'(C_\d+_V[12]_[A-Z]+_\d+_[A-Z]+|C_\d{8,})', response_text, re.IGNORECASE)
                 if cid_match:
                     self.final_cid = cid_match.group(1).upper()
                     self.is_done = True
@@ -195,7 +226,14 @@ class RoomTracker:
         def on_close(ws, c, m):
             self.is_done = True
 
-        ws = websocket.WebSocketApp(WS_URL, header=HEADERS, on_open=on_open, on_message=on_message, on_error=on_error, on_close=on_close)
+        ws = websocket.WebSocketApp(
+            WS_URL,
+            header=HEADERS,
+            on_open=on_open,
+            on_message=on_message,
+            on_error=on_error,
+            on_close=on_close
+        )
         ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE})
         
         while not self.is_done:
@@ -203,18 +241,24 @@ class RoomTracker:
         return self.final_cid
 
 def smart_resolve_input(input_str):
+    # 1. Check if direct CID is present anywhere in the text
     cid_match = re.search(r'(C_\d+_V[12]_[A-Za-z0-9_]+)', input_str, re.IGNORECASE)
     if cid_match:
         return cid_match.group(1).upper()
 
-    if "http" in input_str:
-        link = extract_cid_from_link(input_str)
-        if link:
-            return resolve_link_to_cid(link)
+    # 2. Extract and resolve share link (ihago / olaparty / custom text ke saath wala link)
+    link = extract_cid_from_link(input_str)
+    if link:
+        resolved_cid = resolve_link_to_cid(link)
+        if resolved_cid:
+            return resolved_cid
             
-    clean_str = input_str.strip()
-    if clean_str.isdigit():
-        tracker = RoomTracker(clean_str)
+    # 3. Agar link nahi mila, aur numeric UID/VID diya hai
+    numbers = re.findall(r'\b\d{6,11}\b', input_str)
+    if numbers:
+        # Sabse pehle UID (starts with 4) prefer karein, nahi to first available number
+        target_num = next((n for n in numbers if n.startswith("4")), numbers[0])
+        tracker = RoomTracker(target_num)
         return tracker.start()
         
     return None
@@ -236,7 +280,7 @@ st.markdown(
         font-family: 'Courier New', Courier, monospace;
     }
     
-    /* 🌈 RGB KEYFRAME ANIMATION FOR TEXT (Red, Yellow, Green, Blue, Pink) */
+    /* 🌈 RGB KEYFRAME ANIMATION FOR TEXT */
     @keyframes discoText {
         0% { color: #ff0040; text-shadow: 0 0 10px #ff0040, 0 0 20px #ff0040; }
         20% { color: #ffff00; text-shadow: 0 0 10px #ffff00, 0 0 20px #ffff00; }
@@ -252,7 +296,7 @@ st.markdown(
         display: inline-block;
     }
     
-    /* 🌈 RGB KEYFRAME ANIMATION FOR BORDERS (Gaming Keyboard Effect) */
+    /* 🌈 RGB KEYFRAME ANIMATION FOR BORDERS */
     @keyframes rgbBorder {
         0% { border-color: #ff0040; box-shadow: 0 0 15px #ff0040; }
         20% { border-color: #ffff00; box-shadow: 0 0 15px #ffff00; }
@@ -320,7 +364,7 @@ st.markdown(
     }
     .fish {
         position: absolute;
-        font-size: 25px; /* Choti choti machliyan */
+        font-size: 25px;
         right: -10%;
         animation-name: swim;
         animation-timing-function: linear;
@@ -335,13 +379,11 @@ st.markdown(
         100% { transform: translateX(-110vw) translateY(0px); }
     }
     
-    /* Hide Streamlit Branding */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
     </style>
     
-    <!-- 🐟 FISH HTML OVERLAY (With Different Colors & Speeds) -->
     <div class="fish-container">
         <div class="fish" style="top: 10%; animation-duration: 15s; filter: hue-rotate(0deg);">🐟</div>
         <div class="fish" style="top: 25%; animation-duration: 20s; filter: hue-rotate(90deg);">🐟</div>
@@ -361,14 +403,14 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.markdown("<h1 style='text-align: center; position: relative; z-index: 10;'>☠️<span class='disco-lucky'>𝘽𝙡𝙖𝙯𝙚🌷𝘿𝙤𝙢𝙞❤️𝙇𝙪𝙘𝙠𝙮🖥️</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; position: relative; z-index: 10;'>☠️<span class='disco-lucky'>𝘽𝙡𝙖𝙯𝙚🌷𝘿𝙤𝙢𝙞❤️𝙇𝙪𝙘𝙠𝙮🖥️</span></h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; font-size: 1.2rem; position: relative; z-index: 10;'>SYS.ADMIN: ROOT | <span class='disco-lucky'>𝐋𝐔𝐂𝐊𝐘</span></p>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: #88ff88; position: relative; z-index: 10;'>Is panel se aap bot network ko kisi bhi target room me bhej sakte hain.</p>", unsafe_allow_html=True)
 
 st.markdown("<hr style='position: relative; z-index: 10;'>", unsafe_allow_html=True)
 
-# User input with terminal prefix
-user_input = st.text_input(" ENTER TARGET (Room Link/):", placeholder="https://api.olaparty.com/d/...", label_visibility="collapsed")
+# User input box (accepts raw links, messages with links like "Lucky room https://...", or UIDs)
+user_input = st.text_input("ENTER TARGET (Room Link / Share Message / ID):", placeholder="Lucky room https://api.ihago.net/d/...", label_visibility="collapsed")
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -381,8 +423,8 @@ if st.button("🚀 Click✅"):
             target_cid = smart_resolve_input(user_input)
 
         if target_cid:
-            st.success(f"✅ LUCKY🌎BOSS ke Hukum se Ai gaya")
-            st.info("🚀 Successful.")
+            st.success(f"✅ TARGET CID FOUND: {target_cid}")
+            st.info("🚀 Sending bots to room...")
             
             # Send requests to render bots
             for url in RENDER_URLS:
@@ -392,16 +434,16 @@ if st.button("🚀 Click✅"):
                     res = requests.get(api_link, timeout=15, verify=False)
                     
                     if res.status_code == 200:
-                        st.success(f"✅ SERVER HACKED SUCCESSFUL")
+                        st.success(f"✅ SERVER HACKED SUCCESSFUL ({url})")
                     else:
                         st.error(f"❌ SERVER REJECTED COMMAND. Code: {res.status_code}")
                 except Exception as e:
                     st.error(f"❌ SERVER UNREACHABLE. TARGET OFFLINE.")
             
             st.balloons()
-            st.markdown("<h3 style='text-align: center; position: relative; z-index: 10;'>🎉 <span class='disco-lucky'>𝞑꯭꯭𝑳꯭꯭𝚫̵꯭꯭︥𝒁꯭꯭̄𝜩</span> 🌷 <span class='disco-lucky'>𝐃ꯥ꯭ꮻ꯭ꮇ꯭𝛊❤️𝐋𝐔𝐂𝐊𝐘</span> 🖥️ ZINDABAD 🙋🏻‍♂️</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='text-align: center; position: relative; z-index: 10;'>🎉 <span class='disco-lucky'>𝞑꯭꯭𝑳꯭꯭𝚫̵꯭꯭︥𝒁꯭꯭̄𝜩</span> 🌷 <span class='disco-lucky'>𝐃ꯥ꯭ꮻ꯭ꮇ꯭𝛊❤️𝐋𝐔𝐂𝐊𝐘</span> 🖥️ ZINDABAD 🙋🏻‍♂️</h3>", unsafe_allow_html=True)
         else:
-            st.error("❌ FATAL ERROR: INVALID TARGET OR USER OFFLINE.")
+            st.error("❌ FATAL ERROR: INVALID TARGET OR LINK COULD NOT BE RESOLVED.")
 
 st.markdown("<hr style='position: relative; z-index: 10;'>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; font-size: 0.8rem; color: #88ff88; position: relative; z-index: 10;'>// DEVELOPED BY <span class='disco-lucky'>LUCKY</span> <span class='disco-lucky'>GODFATHER</span> // </p>", unsafe_allow_html=True)
